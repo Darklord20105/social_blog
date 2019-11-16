@@ -16,6 +16,7 @@ import * as ACTIONS from "../store/actions/actions"
 import { Link } from "react-router-dom"
 import history from "../utils/history"
 import axios from "axios"
+import moment from "moment"
 
 import "../App.css"
 
@@ -82,7 +83,7 @@ class Profile extends Component {
             subheader={
               <div className="FlexColumn">
                 <div className="FlexRow">
-                  {post.post.date_created}
+                  {moment(post.post.date_created).format("MMM DD, YYYY | h:mm a")}
                 </div>
                 <div className="FlexRow">
                   <Link to={{ pathname: "/editpost/" + post.post.pid, state: { post } }}><button>Edit</button></Link>

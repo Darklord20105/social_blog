@@ -19,7 +19,16 @@ class ShowPost extends Component {
         this.state = {
             open: false,
             comment: "",
-            cid: ""
+            cid: "",
+            //styling
+            opacity: 0,
+            comments_arr: [],
+            comments_motion: [],
+            delete_comment_id: 0,
+            // likes
+            likes: this.props.location.state.post.post.likes,
+            like_user_id: this.props.location.state.post.post.like_user_id,
+            like_post: true
         }
     }
     componentDidMount() {
@@ -33,7 +42,9 @@ class ShowPost extends Component {
                 console.log(res)
                 this.props.set_comments(res.data)
             })
+            .then(() => this.add_comments_to_state(this.props.comments))
             .catch(err => console.log(err))
+        this.handleTransition();
     }
 
     handleClickOpen = (cid, comment) => {
@@ -47,22 +58,35 @@ class ShowPost extends Component {
     }
     handleSubmit = (event) => {
         event.preventDefault()
+        this.setState({ comment: "" })
+        const comment = event.target.comment.value
         const user_id = this.props.db_profile[0].uid
         const post_id = this.props.location.state.post.post.pid
         const username = this.props.db_profile[0].username
+        //temprarley
+        const temp_cid = 65166
+        const justnow = "Just Now"
+
         const data = {
-            comment: event.target.comment.value,
+            comment: comment,
             post_id: post_id,
             user_id: user_id,
             username: username
         }
 
+        const submitted_comment = {
+            cid: temp_cid,
+            comment: comment,
+            user_id: user_id,
+            author: username,
+            date_created: justnow
+        }
+
         axios.post("/api/post/commenttodb", data)
             .then(res => console.log(res))
             .catch(err => console.log(err))
-            .then(setTimeout(() => {
-                history.replace("/posts")
-            }, 700))
+        window.scroll({ top: 0, left: 0, behavior: "smooth" })
+        this.handleCommentSubmit(submitted_comment)
     }
 
     handleUpdate = () => {
@@ -72,6 +96,7 @@ class ShowPost extends Component {
         const post_id = this.props.location.state.post.post.pid
         const username = this.props.db_profile[0].username
 
+        const justnow = "Just Now"
         const data = {
             cid: cid,
             comment: comment,
@@ -79,31 +104,41 @@ class ShowPost extends Component {
             user_id: user_id,
             username: username
         }
+        const editedComment = {
+            cid,
+            comment,
+            post_id,
+            user_id,
+            author: username,
+            date_created: justnow,
+            isEdited: true
+        }
 
         axios.put("/api/put/commenttodb", data)
             .then(res => console.log(res, "added"))
             .catch(err => console.log(err))
-            .then(setTimeout(() => {
-                history.replace("/posts")
-            }, 700))
+        this.handleCommentUpdate(editedComment)
     }
 
-    handleDeleteComment = () => {
+    handleDelete = () => {
         const cid = this.state.cid
         axios.delete("/api/delete/comment", { data: { cid: cid } })
             .then(res => console.log(res))
             .catch(err => console.log(err))
-            .then(setTimeout(() => {
-                history.replace("/posts")
-            }, 700))
+        this.handleCommentDelete(cid)
+        this.setState({ open: false })
     }
 
     RenderComments = (comment) => {
         console.log("coomment", comment)
         return (
-            <div>
+            <div className={this.state.delete_comment_id === comment.comment.cid ? "FadeOutComment" : "CommentStyle"}>
                 <h3>{comment.comment.comment}</h3>
-                <small>{comment.comment.date_created}</small>
+                <small>
+                    {comment.comment.date_created === "Just Now" ?
+                        <div>{comment.comment.isEdited ? <span>Edited</span> : <span>Just Now</span>}</div>
+                        : comment.comment.date_created
+                    }</small>
                 <p>By : {comment.comment.author}</p>
                 {comment.cur_user_id === comment.comment.user_id
                     ? <Button onClick={() => this.handleClickOpen(comment.comment.cid, comment.comment.comment)}>
@@ -114,6 +149,59 @@ class ShowPost extends Component {
         )
     }
 
+    //styling functions
+    // a helper function to apply transitiion
+    handleTransition = () => {
+        setTimeout(() => this.setState({ opacity: 1 }), 400)
+    }
+    // a helper function to add posts to the state
+    add_comments_to_state = (comments) => {
+        this.setState({ comments_arr: [...comments] })
+        this.animate_comments()
+
+    }
+    // animate each comment
+    animate_comments = () => {
+        let i = 1
+        this.state.comments_arr.map(comment => {
+            setTimeout(() => {
+                this.setState({ comments_motion: [...this.state.comments_motion, comment] })
+            }, 400 * i)
+            i++;
+        })
+    }
+    // the following functions deals only with front end styling only
+    handleCommentSubmit = (submitted_comment) => {
+        setTimeout(() => {
+            this.setState({ comments_motion: [submitted_comment, ...this.state.comments_motion] })
+        }, 50)
+    }
+    handleCommentUpdate = (comment) => {
+        const commentIndex = this.state.comments_motion.findIndex(com => com.cid === comment.cid)
+        let newArray = [...this.state.comments_motion]
+        newArray[commentIndex] = comment
+        this.setState({
+            comments_motion: newArray
+        })
+    }
+    handleCommentDelete = (cid) => {
+        this.setState({ delete_comment_id: cid })
+        const newArr = this.state.comments_motion.filter(com => com.cid !== cid)
+        setTimeout(() => this.setState({ comments_motion: newArr }), 2000)
+    }
+
+    handleLikes = () => {
+        const user_id = this.props.db_profile[0].uid
+        const post_id = this.props.location.state.post.post.pid
+        const data = { uid: user_id, post_id: post_id }
+
+        axios.put("/api/put/likes", data)
+            .then(!this.state.like_user_id.includes(user_id) && this.state.like_post
+                ? this.setState({ likes: this.state.likes + 1 }) : null)
+            .then(this.setState({ like_post: false }))
+            .catch(err => console.log(err))
+    }
+
     render() {
         return (
             <div>
@@ -122,11 +210,17 @@ class ShowPost extends Component {
                     <h4>{this.props.location.state.post.post.title}</h4>
                     <p>{this.props.location.state.post.post.body}</p>
                     <p>{this.props.location.state.post.post.author}</p>
+                    <a style={{ cursor: "pointer" }} onClick={this.props.isAuthenticated
+                        ? () => (this.handleLikes()) : () => history.replace("/")
+                    }>
+                        <i className="material-icons">thumb_up</i>
+                        <small className="notification-num-showpost">{this.state.likes}</small>
+                    </a>
                 </div>
-                <div>
-                    <h2>Comment :</h2>
+                <div style={{ opacity: this.state.opacity, transition: "ease-out 2s" }}>
+                    <h2>Comments :</h2>
                     {this.props.comments
-                        ? this.props.comments.map(comment =>
+                        ? this.state.comments_motion.map(comment =>
                             <this.RenderComments
                                 comment={comment}
                                 cur_user_id={this.props.db_profile[0].uid}
@@ -166,7 +260,7 @@ class ShowPost extends Component {
                                 <Button onClick={() => this.handleClose()}>
                                     Cancel
                                 </Button>
-                                <Button onClick={() => this.handleDeleteComment()}>
+                                <Button onClick={() => this.handleDelete()}>
                                     Delete
                                 </Button>
                             </DialogActions>
@@ -181,7 +275,8 @@ class ShowPost extends Component {
 const mapStateToProps = state => {
     return {
         comments: state.posts_reducer.comments,
-        db_profile: state.auth_reducer.db_profile
+        db_profile: state.auth_reducer.db_profile,
+        isAuthenticated: state.auth_reducer.is_authenticated
     }
 }
 
