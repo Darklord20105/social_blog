@@ -5,6 +5,8 @@ import * as ACTIONS from "../store/actions/actions"
 import axios from "axios"
 import history from "../utils/history"
 
+import {Link} from "react-router-dom"
+
 import TextField from "@material-ui/core/TextField"
 import Dialog from "@material-ui/core/Dialog"
 import DialogActions from "@material-ui/core/DialogActions"
@@ -211,7 +213,7 @@ class ShowPost extends Component {
                     <p>{this.props.location.state.post.post.body}</p>
                     <p>{this.props.location.state.post.post.author}</p>
                     <a style={{ cursor: "pointer" }} onClick={this.props.isAuthenticated
-                        ? () => (this.handleLikes()) : () => history.replace("/")
+                        ? () => (this.handleLikes()) : () => history.replace("/signup")
                     }>
                         <i className="material-icons">thumb_up</i>
                         <small className="notification-num-showpost">{this.state.likes}</small>
@@ -235,7 +237,14 @@ class ShowPost extends Component {
                             margin="normal"
                         />
                         <br />
-                        <Button type="submit">Submit</Button>
+                        {this.props.isAuthenticated
+                            ? <Button type="submit">Submit</Button> 
+                            : <Link to="/signup">
+                                <Button color="primary" variant="contained">
+                                    SignUp to add comment
+                                </Button>
+                            </Link>}
+                        
                     </form>
                 </div>
                 <div>
