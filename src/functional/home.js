@@ -20,22 +20,22 @@ function Home() {
   });
   return (
     <div className="page-header clear-filter" style={{ marginTop: "62px" }} filter-color="blue">
-      <div
+      {/* <div
         className="page-header-image"
         style={{
           // backgroundImage: "url(" + require("img/header.jpg") + ")"
           backgroundImage: "url(img/header.jpg)"
         }}
         ref={pageHeader}
-      ></div>
+      ></div> */}
       <Container>
         <div className="py-5 brand">
-          <img
+          {/* <img
             alt="..."
             className="n-logo"
             // src={require("img/now-logo.png")}
             src="img/now-logo.jpg"
-          />
+          /> */}
           <h1 className="h1-seo">Now UI Blog.</h1>
           <h3>A beautiful Bootstrap 4 Blog Post UI</h3>
         </div>
