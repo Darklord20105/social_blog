@@ -21,3 +21,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# "scripts": {
+#     "start": "cross-env NODE_PATH=./src react-scripts start",
+#     "build": "react-scripts build",
+#     "test": "react-scripts test",
+#     "eject": "react-scripts eject"
+#   },
