@@ -23,7 +23,7 @@ function Home() {
       <div
         className="page-header-image"
         style={{
-          backgroundImage: "url(" + require("assets/img/header.jpg") + ")"
+          backgroundImage: "url(" + require("img/header.jpg") + ")"
         }}
         ref={pageHeader}
       ></div>
@@ -32,7 +32,7 @@ function Home() {
           <img
             alt="..."
             className="n-logo"
-            src={require("assets/img/now-logo.png")}
+            src={require("img/now-logo.png")}
           ></img>
           <h1 className="h1-seo">Now UI Blog.</h1>
           <h3>A beautiful Bootstrap 4 Blog Post UI</h3>
