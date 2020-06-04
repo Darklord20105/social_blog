@@ -5,15 +5,21 @@ import * as ACTIONS from "../store/actions/actions"
 import axios from "axios"
 import history from "../utils/history"
 
-import {Link} from "react-router-dom"
+import { Link } from "react-router-dom"
+import ReactHtmlParser from "react-html-parser"
 
-import TextField from "@material-ui/core/TextField"
-import Dialog from "@material-ui/core/Dialog"
-import DialogActions from "@material-ui/core/DialogActions"
-import DialogContent from "@material-ui/core/DialogContent"
-import DialogContentText from "@material-ui/core/DialogContentText"
-import DialogTitle from "@material-ui/core/DialogTitle"
-import Button from "@material-ui/core/Button"
+import {
+    Container,
+    Row,
+    Col,
+    Card,
+    Button,
+    Input,
+    FormGroup,
+    Modal,
+    ModalBody,
+    ModalHeader,
+} from "reactstrap"
 
 class ShowPost extends Component {
     constructor(props) {
@@ -122,13 +128,15 @@ class ShowPost extends Component {
         this.handleCommentUpdate(editedComment)
     }
 
-    handleDelete = () => {
-        const cid = this.state.cid
+    handleDelete = (comment_id) => {
+        const cid = comment_id
+        console.log("delete runs", cid)
+
         axios.delete("/api/delete/comment", { data: { cid: cid } })
             .then(res => console.log(res))
             .catch(err => console.log(err))
         this.handleCommentDelete(cid)
-        this.setState({ open: false })
+        // this.setState({ open: false })
     }
 
     RenderComments = (comment) => {
@@ -143,10 +151,16 @@ class ShowPost extends Component {
                     }</small>
                 <p>By : {comment.comment.author}</p>
                 {comment.cur_user_id === comment.comment.user_id
-                    ? <Button onClick={() => this.handleClickOpen(comment.comment.cid, comment.comment.comment)}>
-                        Edit
-                </Button>
-                    : null}
+                    ? (
+                        <div>
+                            <Button onClick={() => this.handleClickOpen(comment.comment.cid, comment.comment.comment)}>
+                                Edit
+                            </Button>
+                            <Button onClick={() => this.handleDelete(comment.comment.cid)}>
+                                Delete
+                            </Button>
+                        </div>
+                    ) : null}
             </div>
         )
     }
@@ -205,78 +219,124 @@ class ShowPost extends Component {
     }
 
     render() {
+        console.log(this.props)
+        console.log(this.state)
         return (
-            <div>
-                <div>
-                    <h2>Post</h2>
-                    <h4>{this.props.location.state.post.post.title}</h4>
-                    <p>{this.props.location.state.post.post.body}</p>
-                    <p>{this.props.location.state.post.post.author}</p>
-                    <a style={{ cursor: "pointer" }} onClick={this.props.isAuthenticated
-                        ? () => (this.handleLikes()) : () => history.replace("/signup")
-                    }>
-                        <i className="material-icons">thumb_up</i>
-                        <small className="notification-num-showpost">{this.state.likes}</small>
-                    </a>
-                </div>
-                <div style={{ opacity: this.state.opacity, transition: "ease-out 2s" }}>
-                    <h2>Comments :</h2>
-                    {this.props.comments
-                        ? this.state.comments_motion.map(comment =>
-                            <this.RenderComments
-                                comment={comment}
-                                cur_user_id={this.props.db_profile[0].uid}
-                                key={comment.cid}
-                            />) : null}
-                </div>
-                <div>
-                    <form onSubmit={this.handleSubmit}>
-                        <TextField
-                            id="comment"
-                            label="Comment"
-                            margin="normal"
-                        />
-                        <br />
-                        {this.props.isAuthenticated
-                            ? <Button type="submit">Submit</Button> 
-                            : <Link to="/signup">
-                                <Button color="primary" variant="contained">
-                                    SignUp to add comment
-                                </Button>
-                            </Link>}
-                        
-                    </form>
-                </div>
-                <div>
-                    <Dialog
-                        open={this.state.open}
-                        onClose={this.handleClose}
-                        aria-labelledby="alert-dialog-title"
-                        aria-describedby="alert-dialog-description"
-                    >
-                        <DialogTitle id="alert-dialog-title">Edit Comment</DialogTitle>
-                        <DialogContent>
-                            <DialogContentText id="alert-dialog-description">
-                                <input type="text" value={this.state.comment} onChange={this.handleCommentChange} />
-                            </DialogContentText>
-                            <DialogActions>
-                                <Button onClick={() => {
+            <Container >
+                <Row>
+                    <Col md="8">
+                        <div className="mx-3" style={{ marginTop: "5rem" }}>
+                            <h4>{this.props.location.state.post.post.title}</h4>
+                            <p>{this.props.location.state.post.post.author}</p>
+                            <br />
+                            <div>{ReactHtmlParser(this.props.location.state.post.post.body)}</div>
+                            <a className="btn btn-outline-success ml-2" style={{ cursor: "pointer" }} onClick={this.props.isAuthenticated
+                                ? () => (this.handleLikes()) : () => history.replace("/signup")
+                            }>
+                                <i className="now-ui-icons ui-2_like mr-1"></i>
+                                <span className="notification-num-showpost">{this.state.likes}</span>
+                            </a>
+                            <a className="btn btn-outline-success ml-2">Share</a>
+                        </div>
+                        <Row className="mx-3" style={{ opacity: this.state.opacity, transition: "ease-out 2s" }}>
+                            <Col>
+                                <h2>Comments :</h2>
+                                {this.props.db_profile !== null ?
+                                    (this.props.comments
+                                        ? this.state.comments_motion.map(comment =>
+                                            <this.RenderComments
+                                                comment={comment}
+                                                cur_user_id={this.props.db_profile[0].uid}
+                                                key={comment.cid}
+                                            />) : null) :
+                                    this.props.comments
+                                        ? this.state.comments_motion.map(comment =>
+                                            <this.RenderComments
+                                                comment={comment}
+                                            />) : null
+                                }
+                            </Col>
+                        </Row>
+                        <Row className="mx-3">
+                            <form onSubmit={this.handleSubmit}>
+                                <Input
+                                    type="text"
+                                    placeholder="Comment"
+                                    id="comment"
+                                    required
+                                />
+                                <br />
+                                {this.props.isAuthenticated
+                                    ? <Button color="info" type="submit">
+                                        Add Comment
+                                        </Button>
+                                    : <Link to="/signup">
+                                        <Button color="primary" variant="contained">
+                                            SignUp to add comment
+                                        </Button>
+                                    </Link>}
+
+                            </form>
+                        </Row>
+                    </Col>
+                    <Col> Sidebar</Col>
+                </Row>
+                {/*Edit Comment PopUp */}
+
+                <Modal
+                    modalClassName=" modal-regular"
+                    toggle={() => this.setState({ open: false })}
+                    isOpen={this.state.open}
+
+                >
+                    <ModalHeader>Add new Comment</ModalHeader>
+                    <ModalBody>
+                        <form
+                        // onSubmit={this.handleCommentUpdate}
+                        >
+                            <Row>
+                                <Col lg="6" sm="12">
+                                    <FormGroup>
+                                        <Input
+                                            id="title"
+                                            value={this.state.comment}
+                                            placeholder="Type Your Comment here ...."
+                                            type="text"
+                                            style={{ width: "450px" }}
+                                            required
+                                            onChange={this.handleCommentChange}
+                                        ></Input>
+                                    </FormGroup>
+                                </Col>
+                            </Row>
+                            <Button
+                                className="btn-info"
+                                outline
+                                color="info"
+                                onClick={() => {
+                                    console.log("Editing comments Runs")
                                     this.handleUpdate()
                                     this.setState({ open: false })
-                                }}>
-                                    Agree
-                                </Button>
-                                <Button onClick={() => this.handleClose()}>
-                                    Cancel
-                                </Button>
-                                <Button onClick={() => this.handleDelete()}>
-                                    Delete
-                                </Button>
-                            </DialogActions>
-                        </DialogContent>
-                    </Dialog>
-                </div>
-            </div>
+                                }}
+                            >
+                                Edit Comment
+                            </Button>
+                            <Button
+                                outline
+                                // className="btn-info"
+                                color="info"
+                                type="button"
+                                onClick={() => this.setState({ open: false })}
+                            >
+                                Cancel
+                        </Button>
+                        </form>
+
+                    </ModalBody>
+                </Modal>
+
+                {/* End Edit Popup */}
+            </Container>
         )
     }
 }
@@ -296,3 +356,36 @@ const mapDispatchToProps = dispatch => {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(ShowPost);
+
+
+
+
+//   <div>
+//                     <Dialog
+//                         open={this.state.open}
+//                         onClose={this.handleClose}
+//                         aria-labelledby="alert-dialog-title"
+//                         aria-describedby="alert-dialog-description"
+//                     >
+//                         <DialogTitle id="alert-dialog-title">Edit Comment</DialogTitle>
+//                         <DialogContent>
+//                             <DialogContentText id="alert-dialog-description">
+//                                 <input type="text" value={this.state.comment} onChange={this.handleCommentChange} />
+//                             </DialogContentText>
+//                             <DialogActions>
+//                                 <Button onClick={() => {
+//                                     this.handleUpdate()
+//                                     this.setState({ open: false })
+//                                 }}>
+//                                     Agree
+//                                 </Button>
+//                                 <Button onClick={() => this.handleClose()}>
+//                                     Cancel
+//                                 </Button>
+//                                 <Button onClick={() => this.handleDelete()}>
+//                                     Delete
+//                                 </Button>
+//                             </DialogActions>
+//                         </DialogContent>
+//                     </Dialog>
+//                 </div> 

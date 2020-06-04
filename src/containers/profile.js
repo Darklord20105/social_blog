@@ -1,24 +1,26 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 
-import Paper from "@material-ui/core/Paper";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
-import CardHeader from "@material-ui/core/CardHeader";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Button from "@material-ui/core/button";
-
 import * as ACTIONS from "../store/actions/actions";
-import { Link } from "react-router-dom";
 import history from "../utils/history";
 import axios from "axios";
-import moment from "moment";
+import { Link } from "react-router-dom";
 
-import "../App.css";
+import Layout from "../functional/layout"
+import { ProfileTabInfo } from "./profileTabInfo"
+
+import { ProfileImg } from "./profile/ProfileImg"
+import { ProfileWork } from "./profile/ProfileWork"
+
+// reactstrap components
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Container,
+  Row,
+  Col,
+} from "reactstrap";
 
 class Profile extends Component {
   constructor(props) {
@@ -27,12 +29,22 @@ class Profile extends Component {
     this.state = {
       open: false,
       post_id: null,
-      posts: []
+      posts: [],
+      messages: []
     };
   }
   componentDidMount() {
+    if (this.props.db_profile !== null) {
+      return this.Launch()
+    } else {
+      return null
+    }
+  }
+
+  Launch() {
     const user_id = this.props.db_profile[0].uid;
-    console.log(user_id);
+    const username = this.props.db_profile[0].username;
+    console.log(user_id, username);
     axios
       .get("/api/get/userposts", { params: { user_id: user_id } })
       .then(res => {
@@ -47,6 +59,17 @@ class Profile extends Component {
         console.log("current store state", this.props.user_posts);
       })
       .catch(err => console.log(err));
+
+    axios
+      .get("/api/get/usermessages", {
+        params: { username: username }
+      })
+      .then(res => {
+        console.log(res.data)
+        this.add_message_to_state(res.data)
+        console.log(this.state.messages)
+      })
+      .catch(err => console.log(err));
   }
 
   handleClickOpen = pid => {
@@ -57,72 +80,30 @@ class Profile extends Component {
     this.setState({ open: false, post_id: null });
   };
 
-  RenderProfile = props => (
-    <div>
-      <h1>{this.props.profile.profile.nickname}</h1>
-      <br />
-      <img src={this.props.profile.profile.picture} alt="" />
-      <br />
-      <h4> {this.props.profile.profile.email}</h4>
-      <br />
-      <h5> {this.props.profile.profile.name} </h5>
-      <br />
-      <h6> Email Verified: </h6>
-      {this.props.profile.profile.email_verified ? <p>Yes</p> : <p>No</p>}
-      <br />
-    </div>
-  );
-
-  RenderPosts = post => {
-    return (
-      <Paper>
-        <Card
-          style={{
-            width: "500px",
-            height: "200px",
-            marginBottom: "10px",
-            paddingBottom: "80px"
-          }}
-        >
-          <CardHeader
-            title={
-              <Link
-                to={{ pathname: "/post/" + post.post.pid, state: { post } }}
-              >
-                {post.post.title}
-              </Link>
-            }
-            subheader={
-              <div className="FlexColumn">
-                <div className="FlexRow">
-                  {moment(post.post.date_created).format(
-                    "MMM DD, YYYY | h:mm a"
-                  )}
-                </div>
-                <div className="FlexRow">
-                  <Link
-                    to={{
-                      pathname: "/editpost/" + post.post.pid,
-                      state: { post }
-                    }}
-                  >
-                    <button>Edit</button>
-                  </Link>
-                  <button onClick={() => this.handleClickOpen(post.post.pid)}>
-                    Delete
-                  </button>
-                </div>
-              </div>
-            }
-          />
-          <br />
-          <CardContent>
-            <span style={{ overflow: "hidden" }}>{post.post.body}</span>
-          </CardContent>
-        </Card>
-      </Paper>
-    );
+  add_message_to_state = messages => {
+    console.log(messages);
+    this.setState({ messages: [...messages] });
   };
+
+  RenderProfile = props => {
+    console.log(props)
+    console.log(this.state.messages)
+    return (
+      <Card>
+        <CardBody>
+          <Row>
+            <Col md="4" xl="4">
+              <ProfileImg />
+              <ProfileWork />
+            </Col>
+            <Col md="8" xl="8" >
+              <ProfileTabInfo data={props} messages={this.state.messages} />
+            </Col>
+          </Row>
+        </CardBody>
+      </Card>
+    )
+  }
 
   deletePost = () => {
     const post_id = this.state.post_id;
@@ -144,49 +125,14 @@ class Profile extends Component {
     console.log(this.state.posts);
 
     return (
-      <div>
-        <h1>test</h1>
-        <div>
-          <this.RenderProfile profile={this.props.profile} />
-        </div>
-        <div>
-          <Link
-            to={{ pathname: "/showmessages/" + this.props.db_profile[0].uid }}
-          >
-            <Button variant="contained" color="primary" type="submit">
-              Show Message
-            </Button>
-          </Link>
-        </div>
-        <div>
-          {this.state.posts ? (
-            this.state.posts.map(post => {
-              console.log(post);
-              return <this.RenderPosts key={post.pid} post={post} />;
-            })
-          ) : (
-            <h1>no posts yet</h1>
-          )}
-        </div>
-
-        <Dialog
-          open={this.state.open}
-          onClose={this.handleClose}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">Confirm Delete</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              Deleting Post
-            </DialogContentText>
-            <DialogActions>
-              <Button onClick={() => this.deletePost()}>Agree</Button>
-              <Button onClick={() => this.handleClickClose()}>Cancel</Button>
-            </DialogActions>
-          </DialogContent>
-        </Dialog>
-      </div>
+      <Layout>
+        <Container style={{ marginTop: "5rem" }}>
+          {this.props.db_profile !== null ?
+            <this.RenderProfile profile={this.props.profile} posts={this.state.posts} extraData={this.props.db_profile} /> :
+            <p>Bad request please <Link to="/signup">Log In</Link> again</p>
+          }
+        </Container>
+      </Layout>
     );
   }
 }
@@ -195,13 +141,15 @@ const mapStateToProps = state => {
   return {
     profile: state.auth_reducer.profile,
     user_posts: state.posts_reducer.user_posts,
-    db_profile: state.auth_reducer.db_profile
+    db_profile: state.auth_reducer.db_profile,
+    user_messages: state.user_reducer.UserMessages
   };
 };
 
 const mapDispatchToprops = dispatch => {
   return {
-    set_user_posts: posts => dispatch(ACTIONS.fetch_user_posts(posts))
+    set_user_posts: posts => dispatch(ACTIONS.fetch_user_posts(posts)),
+    set_user_messages: message => dispatch(ACTIONS.set_user_messages(message))
   };
 };
 

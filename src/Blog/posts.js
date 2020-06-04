@@ -7,14 +7,88 @@ import axios from "axios";
 
 import moment from "moment";
 
-import Button from "@material-ui/core/Button";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
-import CardHeader from "@material-ui/core/CardHeader";
-import TextField from "@material-ui/core/TextField";
+import PostListHead from "./postListhead"
+import SideBar from "./sidebar"
+
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardSubtitle,
+  CardText,
+  CardBody,
+  CardImg,
+  Button,
+  Container,
+  Row,
+  Col,
+  Input,
+  CardFooter
+} from "reactstrap";
 
 //we shall use a package called pagination to allow the user not to load all posts but divide them into pages
 import Pagination from "react-js-pagination";
+
+
+export const RenderPosts = post => {
+  const articleStyles = {
+    position: "relative",
+    zIndex: "10",
+    margin: "-30px 30px 0px",
+    background: "#fff",
+    paddingTop: "2rem"
+  }
+  return (
+    <div>
+      <Card style={{ boxShadow: "none" }}>
+        <CardImg
+          // style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 80%)" }}
+          top
+          width="100%"
+          height="350px"
+          src={`https://unsplash.it/800/600/?${Math.floor(Math.random(0, 100) * 100)}`}
+          alt="Card image cap"
+        />
+        <CardHeader className="text-center" style={articleStyles} >
+          <CardSubtitle className="small" style={{ marginBottom: "-20px" }}>Category</CardSubtitle>
+          <CardTitle ><h4 className="font-weight-bold" style={{ letterSpacing: "2px", marginBottom: "0" }}>{post.post.title}</h4></CardTitle>
+          <CardSubtitle>
+            <Link className="small" to={{ pathname: "/user/" + post.post.author, state: { post } }}>
+              By : {post.post.author}
+            </Link>
+          </CardSubtitle>
+        </CardHeader>
+        <CardBody>
+          <CardText>
+            <span className="text-break" style={{ overflow: "hidden" }}>
+              {/* {ReactHtmlParser(post.post.body.slice(0, 200))} */}
+              {post.post.body.slice(0, 200)} ...
+              </span>
+            <Link className="btn btn-outline-info d-block mr-auto ml-auto mt-3" style={{ width: "max-content" }} to={{ pathname: "/post/" + post.post.pid, state: { post } }}>Continue Reading</Link>
+          </CardText>
+        </CardBody>
+        <CardFooter className="small d-flex justify-content-between" style={{ borderTop: "1px #dedede solid", borderBottom: "1px #dedede solid", padding: "1rem 1.25rem" }}>
+          <div>
+            <span><i className="now-ui-icons ui-2_time-alarm mr-1"></i>{moment(post.post.date_created).format("MMM DD, YYYY | h:mm a")}</span>
+            <span style={{
+              marginLeft: "1rem",
+              marginRight: "1rem",
+              borderRight: "1px solid #dedede"
+            }}></span>
+            <span><i className="now-ui-icons ui-2_like mr-1"></i> likes : {post.post.likes}</span>
+          </div>
+
+          <div>
+            <a><i className="now-ui-icons ui-2_favourite-28 mr-1"></i></a>
+            <a><i className="now-ui-icons ui-2_settings-90 mr-1"></i></a>
+            <a><i className="now-ui-icons ui-1_settings-gear-63 mr-1"></i></a>
+            <a><i className="now-ui-icons ui-1_zoom-bold mr-1"></i></a>
+          </div>
+        </CardFooter>
+      </Card>
+    </div>
+  );
+};
 
 class Posts extends Component {
   constructor(props) {
@@ -77,11 +151,13 @@ class Posts extends Component {
         400 * i
       );
       i++;
+      return null;
     });
   };
 
   handleSearch = event => {
     const search_query = event.target.value;
+    console.log(search_query)
 
     axios
       .get("/api/get/searchpost", {
@@ -92,7 +168,7 @@ class Posts extends Component {
       .catch(err => console.log(err));
   };
 
-  // a helper function to add posts to the state
+  // a helper function to add posts to the state 
   add_posts_to_state = posts => {
     this.setState({ posts: [...posts] });
     this.setState({
@@ -126,6 +202,7 @@ class Posts extends Component {
         400 * i
       );
       i++;
+      return null;
     });
   };
 
@@ -136,125 +213,47 @@ class Posts extends Component {
     setTimeout(() => this.animate_posts(), 100);
   };
 
-  RenderPosts = post => {
-    return (
-      <div className="CardStyles">
-        <Card
-          style={{
-            width: "500px",
-            height: "200px",
-            marginBottom: "10px",
-            paddingBottom: "80px"
-          }}
-        >
-          <CardHeader
-            title={
-              <Link
-                to={{ pathname: "/post/" + post.post.pid, state: { post } }}
-              >
-                {post.post.title}
-              </Link>
-            }
-            subheader={
-              <div className="FlexColumn">
-                <div className="FlexRow">
-                  {moment(post.post.date_created).format(
-                    "MMM DD, YYYY | h:mm a"
-                  )}
-                  <br />
-                  <Link
-                    style={{ paddingLeft: "5px", textDecoration: "none" }}
-                    to={{
-                      pathname: "/user/" + post.post.author,
-                      state: { post }
-                    }}
-                  >
-                    By : {post.post.author}
-                  </Link>
-                </div>
-                <div className="FlexRow">
-                  <i className="material-icons">thumb_up</i>
-                  <div className="notification-num-posts">
-                    {post.post.likes}
-                  </div>
-                </div>
-              </div>
-            }
-          />
-          {/* <br /> */}
-          <CardContent>
-            <span style={{ overflow: "hidden" }}>{post.post.body}</span>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  };
 
   render() {
     console.log(this.props.posts);
     return (
-      <div>
-        <div
-          style={{ opacity: this.state.opacity, transition: "opacity 2s ease" }}
-        >
-          <br />
+      <Container style={{ marginTop: "5rem" }}>
+        <Row><h1>All Posts</h1></Row>
+        {/* <Row className="justify-content-center mb-5">
+          <PostListHead />
+        </Row> */}
 
-          {this.props.is_authenticated ? (
-            <Link to="/addpost">
-              <Button color="primary" variant="contained">
-                Add Post
-              </Button>
-            </Link>
-          ) : (
-            <Link to="/signup">
-              <Button color="primary" variant="contained">
-                SignUp to add post
-              </Button>
-            </Link>
-          )}
-        </div>
-
-        {/* search UI */}
-        <div>
-          <TextField
-            id="search"
-            label="Search"
-            margin="normal"
-            onChange={this.handleSearch}
-          />
-        </div>
-        <div>
-          {this.state.posts_search ? (
-            <div>
-              {this.state.posts_search_motion.map(post => (
-                <this.RenderPosts key={post.pid} post={post} />
-              ))}
-            </div>
-          ) : null}
-        </div>
-
-        <div
-          style={{ opacity: this.state.opacity, transition: "opacity 2s ease" }}
-        >
-          <h1>All Posts</h1>
-          <div>
+        {/* render posts list */}
+        <Row style={{ opacity: this.state.opacity, transition: "opacity 2s ease" }}>
+          <Col md="8">
             {this.state.posts ? (
               <div>
                 {this.state.posts_motion.map(post => (
-                  <this.RenderPosts key={post.pid} post={post} />
+                  <RenderPosts key={post.pid} post={post} />
                 ))}
               </div>
             ) : null}
-          </div>
+
+          </Col>
+          <Col md="4">
+            <SideBar />
+          </Col>
+        </Row>
+
+        {/* Pagination */}
+        <Row>
           <Pagination
             activePage={this.state.activePage}
             itemsCountPerPage={5}
             totalItemsCount={this.state.num_posts}
             pageRangeDisplayed={this.state.page_range}
             onChange={this.handlePageChange}
+            itemClass="page-item"
+            linkClass="page-link"
           />
-        </div>
-      </div>
+        </Row>
+
+      </Container>
     );
   }
 }
@@ -280,3 +279,43 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(Posts);
+
+//  {/* search UI */}
+//         {/* <Row>
+//           <div>
+//             <Input
+//               type="text"
+//               id="search"
+//               placeholder="Search"
+//               onChange={this.handleSearch}
+//             />
+//           </div>
+//           <div>
+//             {this.state.posts_search ? (
+//               <div>
+//                 {this.state.posts_search_motion.map(post => (
+//                   <this.RenderPosts key={post.pid} post={post} />
+//                 ))}
+//               </div>
+//             ) : null}
+//           </div>
+//         </Row> */}
+
+// {/* add post button */}
+// <Row style={{ opacity: this.state.opacity, transition: "opacity 2s ease" }}>
+// <br />
+// {this.props.is_authenticated ? (
+//   <Link to="/addpost">
+//     <Button color="primary" variant="contained">
+//       Add Post
+//         </Button>
+//   </Link>
+// ) : (
+//     <Link to="/signup">
+//       <Button color="primary" variant="contained">
+//         SignUp to add post
+//         </Button>
+//     </Link>
+//   )
+// }
+// </Row>

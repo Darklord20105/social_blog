@@ -1,29 +1,32 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 
-import Container1 from "./containers/container1";
-import Header from "./containers/header";
+// import Container1 from "./containers/container1";
 import Profile from "./containers/profile";
-import Form1 from "./containers/form1";
-import RenderList from "./containers/renderlist";
+// import Form1 from "./containers/form1";
+// import RenderList from "./containers/renderlist";
 
-import Component1 from "./functional/component1";
+// import Component1 from "./functional/component1";
 import Callback from "./functional/callback";
-import PrivateComponent from "./functional/privatecomponent";
+// import PrivateComponent from "./functional/privatecomponent";
 import UnauthRedirect from "./functional/unauthredirect";
 import Home from "./functional/home";
-import RenderListItem from "./functional/renderlistitem";
+// import RenderListItem from "./functional/renderlistitem";
 import SignUp from "./functional/signup";
 
-import ShowUser from "./profile/showuser";
-import SendMessage from "./profile/sendmessage";
-import ShowMessages from "./profile/showmessages";
-import ReplyToMessage from "./profile/replytomessage";
+// import ShowUser from "./profile/showuser";
+// import SendMessage from "./profile/sendmessage";
+// import ShowMessages from "./profile/showmessages";
+// import ReplyToMessage from "./profile/replytomessage";
 
 import Posts from "./Blog/posts";
 import AddPost from "./Blog/addpost";
-import EditPost from "./Blog/editpost";
+// import EditPost from "./Blog/editpost";
 import ShowPost from "./Blog/showpost";
+import SearchResults from "./Blog/searchResults"
+
+import Layout from "./functional/layout"
+import NavigationBar from "./functional/navbar"
 
 import * as ACTIONS from "./store/actions/actions";
 
@@ -47,8 +50,8 @@ const PrivateRoute = ({ component: Component, auth }) => (
       auth.isAuthenticated() === true ? (
         <Component auth={auth} {...props} />
       ) : (
-        <Redirect to={{ pathname: "/signup" }} />
-      )
+          <Redirect to={{ pathname: "/signup" }} />
+        )
     }
   />
 );
@@ -69,29 +72,35 @@ class Routes extends Component {
 
   render() {
     return (
-      <div>
-        <Router history={history}>
-          <div>
-            <Header auth={auth} />
+      <Router history={history}>
+        <Layout >
+          <div className="wrapper">
             <Switch>
-              <Route exact path="/" component={Home} />
-              <Route exact path="/form1" component={Form1} />
               <Route
+                exact
+                path="/"
+                auth={auth}
+                component={Home}
+              // render={() => <Home auth={auth} />}
+              />
+              {/* <Route exact path="/form1" component={Form1} /> */}
+              {/* <Route
                 exact
                 path="/container1"
                 render={() => <Container1 auth={auth} />}
-              />
+              /> */}
               <Route
                 path="/authcheck"
                 render={() => <AuthCheck auth={auth} />}
               />
               <Route path="/redirect" component={UnauthRedirect} />
-              <Route path="/renderlist" component={RenderList} />
               <Route path="/signup" render={() => <SignUp auth={auth} />} />
 
-              <Route path="/user/:uid" component={ShowUser} />
-              {/* //the user needs to be authenticated to use messages func */}
-              <PrivateRoute
+              <Route path="/search-results" component={SearchResults} />
+
+              {/* <Route path="/user/:uid" component={ShowUser} /> */}
+
+              {/* <PrivateRoute
                 path="/sendmessage"
                 auth={auth}
                 component={SendMessage}
@@ -105,11 +114,11 @@ class Routes extends Component {
                 path="/replytomessage"
                 auth={auth}
                 component={ReplyToMessage}
-              />
+              /> */}
 
               <Route path="/posts" component={Posts} />
               <Route path="/post/:pid" component={ShowPost} />
-              <Route path="/editpost/:pid" component={EditPost} />
+              {/* <Route path="/editpost/:pid" component={EditPost} /> */}
               <Route path="/addpost" component={AddPost} />
 
               <Route
@@ -119,23 +128,23 @@ class Routes extends Component {
                   return <Callback />;
                 }}
               />
-              <Route
+              {/* <Route
                 path="/component1"
                 render={props => <Component1 {...props} />}
-              />
+              /> */}
 
-              <Route path="/listitem/:id" component={RenderListItem} />
+              {/* <Route path="/listitem/:id" component={RenderListItem} /> */}
 
-              <PrivateRoute
+              {/* <PrivateRoute
                 path="/privateroute"
                 auth={auth}
                 component={PrivateComponent}
-              />
+              /> */}
               <PrivateRoute path="/profile" auth={auth} component={Profile} />
             </Switch>
           </div>
-        </Router>
-      </div>
+        </Layout>
+      </Router>
     );
   }
 }
