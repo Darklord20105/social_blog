@@ -5,7 +5,7 @@ export default class Auth {
   auth0 = new auth0.WebAuth({
     domain: "webapp1.auth0.com",
     clientID: "uZxUdMAsiDWeu3OrNpoi4JwJscdF5nAx",
-    redirectUri: "http://localhost:3000/callback",
+    redirectUri: "https://my-social-blog-client.herokuapp.com/callback",
     responseType: "token id_token",
     scope: "openid profile email"
   });
