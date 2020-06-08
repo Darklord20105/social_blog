@@ -114,7 +114,7 @@ class Posts extends Component {
   componentDidMount() {
     this.handleTransition();
     axios
-      .get("/api/get/allposts")
+      .get("https://my-social-blog-api-server.herokuapp.com/api/get/allposts")
       .then(res => {
         console.log(res.data);
         this.props.set_posts(res.data);
