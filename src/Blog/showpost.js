@@ -41,7 +41,7 @@ class ShowPost extends Component {
     }
     componentDidMount() {
         console.log(this.props)
-        axios.get("/api/get/allpostcomments", {
+        axios.get("https://my-social-blog-api-server.herokuapp.com/api/get/allpostcomments", {
             params: {
                 post_id: this.props.location.state.post.post.pid
             }
@@ -90,7 +90,7 @@ class ShowPost extends Component {
             date_created: justnow
         }
 
-        axios.post("/api/post/commenttodb", data)
+        axios.post("https://my-social-blog-api-server.herokuapp.com/api/post/commenttodb", data)
             .then(res => console.log(res))
             .catch(err => console.log(err))
         window.scroll({ top: 0, left: 0, behavior: "smooth" })
@@ -122,7 +122,7 @@ class ShowPost extends Component {
             isEdited: true
         }
 
-        axios.put("/api/put/commenttodb", data)
+        axios.put("https://my-social-blog-api-server.herokuapp.com/api/put/commenttodb", data)
             .then(res => console.log(res, "added"))
             .catch(err => console.log(err))
         this.handleCommentUpdate(editedComment)
@@ -132,7 +132,7 @@ class ShowPost extends Component {
         const cid = comment_id
         console.log("delete runs", cid)
 
-        axios.delete("/api/delete/comment", { data: { cid: cid } })
+        axios.delete("https://my-social-blog-api-server.herokuapp.com/api/delete/comment", { data: { cid: cid } })
             .then(res => console.log(res))
             .catch(err => console.log(err))
         this.handleCommentDelete(cid)
@@ -211,7 +211,7 @@ class ShowPost extends Component {
         const post_id = this.props.location.state.post.post.pid
         const data = { uid: user_id, post_id: post_id }
 
-        axios.put("/api/put/likes", data)
+        axios.put("https://my-social-blog-api-server.herokuapp.com/api/put/likes", data)
             .then(!this.state.like_user_id.includes(user_id) && this.state.like_post
                 ? this.setState({ likes: this.state.likes + 1 }) : null)
             .then(this.setState({ like_post: false }))

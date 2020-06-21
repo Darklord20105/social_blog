@@ -46,7 +46,7 @@ class Profile extends Component {
     const username = this.props.db_profile[0].username;
     console.log(user_id, username);
     axios
-      .get("/api/get/userposts", { params: { user_id: user_id } })
+      .get("https://my-social-blog-api-server.herokuapp.com/api/get/userposts", { params: { user_id: user_id } })
       .then(res => {
         console.log(res.data);
         this.setState({
@@ -61,7 +61,7 @@ class Profile extends Component {
       .catch(err => console.log(err));
 
     axios
-      .get("/api/get/usermessages", {
+      .get("https://my-social-blog-api-server.herokuapp.com/api/get/usermessages", {
         params: { username: username }
       })
       .then(res => {
@@ -108,10 +108,10 @@ class Profile extends Component {
   deletePost = () => {
     const post_id = this.state.post_id;
     axios
-      .delete("/api/delete/postcomments", { data: { post_id: post_id } })
+      .delete("https://my-social-blog-api-server.herokuapp.com/api/delete/postcomments", { data: { post_id: post_id } })
       .then(() =>
         axios
-          .delete("/api/delete/post", { data: { post_id: post_id } })
+          .delete("https://my-social-blog-api-server.herokuapp.com/api/delete/post", { data: { post_id: post_id } })
           .then(res => console.log(res))
       )
       .catch(err => console.log(err))

@@ -31,10 +31,10 @@ export const ProfileTabInfoPostListRenderer = (postList) => {
     const deletePost = () => {
         const post_id = post_pid;
         axios
-            .delete("/api/delete/postcomments", { data: { post_id: post_id } })
+            .delete("https://my-social-blog-api-server.herokuapp.com/api/delete/postcomments", { data: { post_id: post_id } })
             .then(() =>
                 axios
-                    .delete("/api/delete/post", { data: { post_id: post_id } })
+                    .delete("https://my-social-blog-api-server.herokuapp.com/api/delete/post", { data: { post_id: post_id } })
                     .then(res => console.log(res))
             )
             .catch(err => console.log(err))

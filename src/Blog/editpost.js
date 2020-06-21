@@ -1,9 +1,10 @@
 import React, { Component } from "react"
 import axios from "axios"
 import history from "../utils/history"
-import TextFiled from "@material-ui/core/TextField"
-import Button from "@material-ui/core/Button"
+import { Button } from "reactstrap"
 import { connect } from "react-redux"
+
+import { Editor } from "@tinymce/tinymce-react"
 
 class EditPost extends Component {
     constructor(props) {
@@ -46,7 +47,7 @@ class EditPost extends Component {
             uid: uid,
             username: username
         }
-        axios.put("/api/put/post", data)
+        axios.put("https://my-social-blog-api-server.herokuapp.com/api/put/post", data)
             .then(res => console.log(res))
             .catch(err => console.log(err))
             .then(
@@ -56,7 +57,58 @@ class EditPost extends Component {
 
     render() {
         return (
-            <div>
+            <Container style={{ marginTop: "5rem" }}>
+                {this.props.db_profile !== null ?
+                    <div>
+                        <div>
+                            <h2>Create New Article</h2>
+                        </div>
+                        <form onSubmit={this.handleSubmit}>
+                            <FormGroup>
+                                <Input
+                                    type="text"
+                                    id="title"
+                                    placeholder="Enter Article Title"
+                                    required
+                                    value={this.state.title}
+                                />
+                            </FormGroup>
+
+                            <Editor
+                                initialValue={this.state.body}
+                                init={{
+                                    height: 500,
+                                    menubar: false,
+                                    plugins: [
+                                        'advlist autolink lists link image charmap print preview anchor',
+                                        'searchreplace visualblocks code fullscreen',
+                                        'insertdatetime media table paste code help wordcount'
+                                    ],
+                                    toolbar:
+                                        'undo redo | formatselect | bold italic backcolor | \
+                                        alignleft aligncenter alignright alignjustify | \
+                                        bullist numlist outdent indent | removeformat | help'
+                                }}
+                                onEditorChange={this.handleEditorChange}
+                            />
+                            <Button className="btn btn-success" type="submit"> Submit </Button>
+                            <Button className="btn btn-danger" onClick={() => history.goBack()}> Cancel </Button>
+                        </form>
+                    </div> : <Redirect to="/signup" />}
+            </Container>
+        )
+    }
+}
+
+const mapStateToProps = state => {
+    return {
+        db_profile: state.auth_reducer.db_profile
+    }
+}
+
+export default connect(mapStateToProps)(EditPost)
+
+{/* <div>
                 <form onSubmit={this.handleSubmit}>
                     <TextFiled
                         id="title"
@@ -77,15 +129,4 @@ class EditPost extends Component {
                     <Button type="submit"> Submit </Button>
                 </form>
                 <button onClick={() => history.goBack()}> Cancel </button>
-            </div>
-        )
-    }
-}
-
-const mapStateToProps = state => {
-    return {
-        db_profile: state.auth_reducer.db_profile
-    }
-}
-
-export default connect(mapStateToProps)(EditPost)
+            </div> */}

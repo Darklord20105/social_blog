@@ -7,7 +7,6 @@ import axios from "axios";
 
 import moment from "moment";
 
-import PostListHead from "./postListhead"
 import SideBar from "./sidebar"
 
 import {
@@ -114,7 +113,7 @@ class Posts extends Component {
   componentDidMount() {
     this.handleTransition();
     axios
-      .get("/api/get/allposts")
+      .get("https://my-social-blog-api-server.herokuapp.com/api/get/allposts")
       .then(res => {
         console.log(res.data);
         this.props.set_posts(res.data);
@@ -160,7 +159,7 @@ class Posts extends Component {
     console.log(search_query)
 
     axios
-      .get("/api/get/searchpost", {
+      .get("https://my-social-blog-api-server.herokuapp.com/api/get/searchpost", {
         params: { search_query: search_query }
       })
       .then(res => this.props.posts_success(res.data))

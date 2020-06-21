@@ -34,7 +34,7 @@ class SearchResults extends React.Component {
     AxiosSearchCall = (search_query) => {
         console.log(search_query)
         axios
-            .get("/api/get/searchpost", {
+            .get("https://my-social-blog-api-server.herokuapp.com/api/get/searchpost", {
                 params: { search_query: search_query }
             })
             .then(res => {

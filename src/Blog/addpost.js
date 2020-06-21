@@ -11,7 +11,7 @@ import { Editor } from "@tinymce/tinymce-react"
 
 class AddPost extends Component {
     state = {
-        body: "<p>This is the initial content of the editor</p>"
+        body: ""
     }
     handleSubmit = (event) => {
         event.preventDefault()
@@ -24,7 +24,7 @@ class AddPost extends Component {
             username: username,
             uid: user_id
         }
-        axios.post("/api/post/posttodb", data)
+        axios.post("https://my-social-blog-api-server.herokuapp.com/api/post/posttodb", data)
             .then(res => console.log(res))
             .catch((err) => console.log(err))
             .then(setTimeout(() => history.replace("/posts"), 700))
@@ -79,7 +79,7 @@ class AddPost extends Component {
                                 onEditorChange={this.handleEditorChange}
                             />
                             <Button className="btn btn-success" type="submit"> Submit </Button>
-                            <Button className="btn btn-danger" onClick={() => history.replace("/posts")}> Cancel </Button>
+                            <Button className="btn btn-danger" onClick={() => history.goBack()}> Cancel </Button>
                         </form>
                     </div> : <Redirect to="/signup" />}
             </Container>
